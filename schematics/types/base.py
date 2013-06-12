@@ -304,6 +304,8 @@ class URLType(StringType):
         super(URLType, self).__init__(**kwargs)
 
     def validate_url(self, value):
+        if value is None:
+            return value
         if not URLType.URL_REGEX.match(value):
             raise StopValidation(self.messages['invalid_url'])
         if self.verify_exists:
@@ -582,6 +584,8 @@ class GeoPointType(BaseType):
     def convert(self, value):
         """Make sure that a geo-value is of type (x, y)
         """
+        if value is None:
+            return value
         if not len(value) == 2:
             raise ValueError('Value must be a two-dimensional point')
         if isinstance(value, dict):

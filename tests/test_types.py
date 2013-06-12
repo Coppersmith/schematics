@@ -4,7 +4,7 @@ import datetime
 
 from schematics.types import (
     BaseType, StringType, DateTimeType, DateType, IntType, EmailType, LongType,
-    URLType,
+    URLType, GeoPointType
 )
 from schematics.exceptions import ValidationError, StopValidation, ConversionError
 
@@ -49,6 +49,15 @@ class TestType(unittest.TestCase):
             IntType()('a')
         self.assertEqual(IntType()(1), 1)
 
+
+    def test_none_passed_to_geopointtype(self):
+        geo_type = GeoPointType()
+        self.assertEqual(geo_type(None),None)
+
+    def test_none_passed_to_urltype(self):
+        url_type = URLType()
+        self.assertEqual(url_type(None),None)        
+        
 
 class TestTypeValidators(unittest.TestCase):
     def test_custom_validation_functions(self):
