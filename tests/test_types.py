@@ -6,6 +6,7 @@ from schematics.types import (
     BaseType, StringType, DateTimeType, DateType, IntType, EmailType, LongType,
     URLType, GeoPointType
 )
+from schematics.types.temporal import MillisecondType
 from schematics.exceptions import ValidationError, StopValidation, ConversionError
 
 
@@ -43,12 +44,11 @@ class TestType(unittest.TestCase):
         dt_type = DateTimeType(serialized_format='%Y.%m.%d %H:%M')
         self.assertEqual(dt_type(dt), dt)
         self.assertEqual(dt_type.to_primitive(dt), output)
-
+        
     def test_int(self):
         with self.assertRaises(ConversionError):
             IntType()('a')
         self.assertEqual(IntType()(1), 1)
-
 
     def test_none_passed_to_geopointtype(self):
         geo_type = GeoPointType()
@@ -57,8 +57,44 @@ class TestType(unittest.TestCase):
     def test_none_passed_to_urltype(self):
         url_type = URLType()
         self.assertEqual(url_type(None),None)        
-        
 
+    def test_millisecond_accepts_datetime(self):
+        from dateutil.parser import parse
+        from time import mktime
+        a_time = '2013-03-01 15:59:59'
+
+        a_long = long(mktime(parse(a_time).timetuple())) * 1000
+
+        millisecond_type = MillisecondType()
+        
+        self.assertEqual(millisecond_type(a_time), a_long)
+        
+    def test_millisecond(self):
+        def datestring_to_millis(ds):
+            """Takes a string representing the date and converts it to milliseconds
+            since epoch.
+            """
+            from dateutil.parser import parse
+            dt = parse(ds)
+            return datetime_to_millis(dt)
+        
+        def datetime_to_millis(dt):
+            """Takes a datetime instances and converts it to milliseconds since epoch.
+            """
+            seconds = dt.timetuple()
+            from time import mktime
+            seconds_from_epoch = mktime(seconds)
+            return seconds_from_epoch * 1000 # milliseconds
+        
+        a_time = '2013-03-01 15:59:59'
+        #datetime.datetime(2013, 3, 1,15,59,59)
+        #print a_time
+        #print long(datestring_to_millis(a_time))
+        millisecond_type = MillisecondType()
+        #print '**',millisecond_type(long(datestring_to_millis(a_time))),'**'
+        self.assertEqual(millisecond_type(a_time),datestring_to_millis(a_time))
+        
+        
 class TestTypeValidators(unittest.TestCase):
     def test_custom_validation_functions(self):
         class UppercaseType(BaseType):
