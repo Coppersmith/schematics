@@ -13,7 +13,7 @@ except ImportError:
     )
 
 from .base import DateTimeType, LongType
-
+from ..exceptions import ConversionError
 
 class TimeStampType(DateTimeType):
     """Variant of a datetime field that saves itself as a unix timestamp (int)
@@ -73,8 +73,9 @@ class MillisecondType(LongType):
         if value is None:
             return None
 
-        if not isinstance(value, (unicode,str,long,int)):
-            raise ConversionError(self.messages['convert'])
+        if not isinstance(value, (unicode,str,long,int,float)):
+            print value, type(value)
+            raise ConversionError('MillisecondType was given a value that it cannot coerce into milliseconds.')
         if isinstance(value, (unicode,str)): 
             value=MillisecondType.datestring_to_millis(value)
         
